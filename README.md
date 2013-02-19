@@ -7,7 +7,7 @@ Easy setup for scalikejdbc
 
 ### Working with default database
 
-Connection pool for the database named 'default' can be set up with Config#setup and closed with Config#close
+Connection pool for the database named 'default' can be set up with DBs#setup and closed with DBs#close
 
 ```
 db.default.url="jdbc:h2:memory"
@@ -17,14 +17,14 @@ db.default.password="secret"
 ```
 
 ```scala
-scala> Config.setup(
+scala> DBs.setup(
 
 scala> DB readOnly { implicit session =>
      |   SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
      | }
 res1: Option[Int] = Some(1)
 
-scala> Config.close()
+scala> DBs.close()
 ```
 
 
@@ -49,7 +49,7 @@ scala> import com.github.tototoshi.scalikejdbc.config._
 
 scala> import scalikejdbc._
 
-scala> Config.setupAll
+scala> DBs.setupAll
 
 scala> NamedDB('foo) readOnly { implicit session =>
      |   SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
@@ -61,8 +61,5 @@ scala> NamedDB('bar) readOnly { implicit session =>
      | }
 res1: Option[Int] = Some(1)
 
-scala> Config.closeAll
+scala> DBs.closeAll
 ```
-
-
-

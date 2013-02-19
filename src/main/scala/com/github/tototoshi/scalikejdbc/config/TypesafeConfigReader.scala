@@ -2,14 +2,13 @@ package com.github.tototoshi.scalikejdbc.config
 
 import com.typesafe.config.{ Config => TypesafeConfig, ConfigFactory }
 import scala.collection.mutable.{ Map => MutableMap, ListBuffer }
-import scalikejdbc._
 import scala.util.control.NonFatal
 
 class ConfigurationException(val message: String) extends Exception(message) {
   def this(e: Throwable) = this(e.getMessage)
 }
 
-object Config {
+object TypesafeConfigReader {
 
   var _config: TypesafeConfig = ConfigFactory.load()
 
@@ -29,7 +28,7 @@ object Config {
     buf.toList.distinct
   }
 
-  def apply(dbName: Symbol): Map[String, String] = {
+  def readAsMap(dbName: Symbol): Map[String, String] = {
     try {
       val dbConfig = _config.getConfig("db." + dbName.name)
       val it = dbConfig.entrySet.iterator
@@ -45,12 +44,8 @@ object Config {
     }
   }
 
-  def setup(): Unit = {
-    setup('default)
-  }
-
-  def setup(dbName: Symbol): Unit = {
-    val configMap = apply(dbName)
+  def read(dbName: Symbol): JDBCSetting = {
+    val configMap = TypesafeConfigReader.readAsMap(dbName)
 
     (for {
       driver <- configMap.get("driver")
@@ -58,32 +53,10 @@ object Config {
       user <- configMap.get("user")
       password <- configMap.get("password")
     } yield {
-      (driver, url, user, password)
-    }) match {
-      case Some((driver, url, user, password)) => {
-        Class.forName(driver)
-        ConnectionPool.add(dbName, url, user, password)
-      }
-      case None => {
-        throw new ConfigurationException("Configuration error for database " + dbName + ". " + configMap.toString)
-      }
+      JDBCSetting(driver, url, user, password)
+    }) getOrElse {
+      throw new ConfigurationException("Configuration error for database " + dbName + ". " + configMap.toString)
     }
-  }
-
-  def setupAll(): Unit = {
-    dbNames.foreach { dbName => setup(Symbol(dbName)) }
-  }
-
-  def close(): Unit = {
-    close('default)
-  }
-
-  def close(dbName: Symbol): Unit = {
-    ConnectionPool.close(dbName)
-  }
-
-  def closeAll(): Unit = {
-    ConnectionPool.closeAll
   }
 
 }
