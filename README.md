@@ -5,6 +5,31 @@ Easy setup for scalikejdbc
 
 ## Example
 
+### Working with default database
+
+Connection pool for the database named 'default' can be set up with Config#setup and closed with Config#close
+
+```
+db.default.url="jdbc:h2:memory"
+db.default.driver="org.h2.Driver"
+db.default.user="sa"
+db.default.password="secret"
+```
+
+```scala
+scala> Config.setup(
+
+scala> DB readOnly { implicit session =>
+     |   SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
+     | }
+res1: Option[Int] = Some(1)
+
+scala> Config.close()
+```
+
+
+### Working with named databases
+
 src/main/resources/application.conf
 ```
 db.foo.url="jdbc:h2:memory"
@@ -38,4 +63,6 @@ res1: Option[Int] = Some(1)
 
 scala> Config.closeAll
 ```
+
+
 
