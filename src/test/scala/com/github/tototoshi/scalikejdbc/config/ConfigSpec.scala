@@ -44,6 +44,11 @@ class ConfigSpec extends FunSpec with ShouldMatchers {
         res should be (Some(1))
         Config.close('foo)
       }
+      describe ("When an unknown database name is passed") {
+        intercept[ConfigurationException] {
+          Config.setup('unknown)
+        }
+      }
     }
 
     describe ("#setupAll") {
