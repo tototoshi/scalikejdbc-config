@@ -23,11 +23,19 @@ class ConfigSpec extends FunSpec with ShouldMatchers {
     }
 
     it ("should get db names") {
-      val expected = List("foo", "bar")
+      val expected = List("default", "foo", "bar")
       Config.dbNames should be (expected)
     }
 
     describe ("#setup") {
+      it ("should setup default connection with no argument") {
+        Config.setup()
+        val res = DB readOnly { implicit session =>
+          SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
+        }
+        res should be (Some(1))
+        Config.close()
+      }
       it ("should setup a connection pool") {
         Config.setup('foo)
         val res = NamedDB('foo) readOnly { implicit session =>
@@ -54,6 +62,24 @@ class ConfigSpec extends FunSpec with ShouldMatchers {
     }
 
     describe ("#close") {
+      describe ("When no argument is passed") {
+        it ("should close default connection pool") {
+          Config.setup()
+          Config.setup('foo)
+          Config.close()
+          intercept[IllegalStateException] {
+            DB readOnly { implicit session =>
+              SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
+            }
+          }
+          val res = NamedDB('foo) readOnly { implicit session =>
+            SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
+          }
+          res should be (Some(1))
+          Config.close('foo)
+        }
+      }
+
       it ("should close a connection pool") {
         Config.setup('foo)
         Config.close('foo)

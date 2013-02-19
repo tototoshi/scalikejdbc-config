@@ -37,6 +37,10 @@ object Config {
     configMap.toMap
   }
 
+  def setup(): Unit = {
+    setup('default)
+  }
+
   def setup(dbName: Symbol): Unit = {
     val configMap = apply(dbName)
 
@@ -60,6 +64,10 @@ object Config {
 
   def setupAll(): Unit = {
     dbNames.foreach { dbName => setup(Symbol(dbName)) }
+  }
+
+  def close(): Unit = {
+    close('default)
   }
 
   def close(dbName: Symbol): Unit = {
