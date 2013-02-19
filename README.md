@@ -17,7 +17,11 @@ db.default.password="secret"
 ```
 
 ```scala
+<<<<<<< HEAD
 scala> DBs.setup(
+=======
+scala> Config.setup
+>>>>>>> bd0d4af621d291a4c5a7a4fdbdcc30b748f34a55
 
 scala> DB readOnly { implicit session =>
      |   SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
