@@ -2,6 +2,7 @@
 
 Easy setup for scalikejdbc
 
+This project has been merged to [seratch/scalikejdbc](https://github.com/seratch/scalikejdbc).
 
 ## Example
 
